@@ -3,17 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>湖北盐业集团有限公司荆州分公司营销中心 - 智能管理系统 v4.0</title>
+<title>湖北盐业集团有限公司荆州分公司营销中心 - 智能管理系统 v5.0</title>
 <meta name="description" content="湖北盐业集团荆州分公司智能管理系统 - 库存进销存看板、客户资料台账、分区配送路线、销售考核看板">
-<meta name="keywords" content="盐业管理,进销存,客户管理,配送线路,销售考核,荆州盐业">
 <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/logo-original.png">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#050c1a">
-<meta property="og:title" content="荆州盐业智能管理系统 v4.0">
-<meta property="og:description" content="湖北盐业集团荆州分公司营销中心智能管理平台">
-<meta property="og:image" content="https://2953998209-crypto.github.io/jingzhou-salt-system/assets/icons/logo-original.png">
-<meta property="og:url" content="https://2953998209-crypto.github.io/jingzhou-salt-system/">
+<meta name="theme-color" content="#0a0f1f">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -142,6 +136,9 @@ tr:hover{background:rgba(0,229,255,.03)}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(0,229,255,.2);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(0,229,255,.4)}
+td[contenteditable="true"]{cursor:text;transition:background .2s}
+td[contenteditable="true"]:hover{background:rgba(0,229,255,.05)}
+td[contenteditable="true"]:focus{outline:1px solid var(--cyan);background:rgba(0,229,255,.08);border-radius:3px}
 @media(max-width:1400px){.kpi-row{grid-template-columns:repeat(3,1fr)}.chart-row{grid-template-columns:1fr 1fr}.zone-cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}.chart-row{grid-template-columns:1fr}.zone-cards{grid-template-columns:1fr}}
 </style>
@@ -153,7 +150,7 @@ tr:hover{background:rgba(0,229,255,.03)}
 <div class="header">
   <div class="header-left">
     <div class="header-logo">盐</div>
-    <div><div class="header-title">湖北盐业集团有限公司荆州分公司营销中心</div><div class="header-sub">智能管理系统 v4.0</div></div>
+    <div><div class="header-title">湖北盐业集团有限公司荆州分公司营销中心</div><div class="header-sub">智能管理系统 v5.0</div></div>
   </div>
   <div class="header-center">
     <div class="header-clock" id="header-clock">--:--:--</div>
@@ -208,12 +205,14 @@ tr:hover{background:rgba(0,229,255,.03)}
       <div style="display:flex;gap:6px;align-items:center;">
         <select id="borrow-month-filter" onchange="renderBorrowRecords()"><option value="">全部月份</option></select>
         <select id="borrow-product-filter" onchange="renderBorrowRecords()"><option value="">全部品类</option></select>
-        <input type="text" id="borrow-search" placeholder="搜索..." oninput="renderBorrowRecords()" style="width:130px;">
+        <select id="borrow-type-filter" onchange="renderBorrowRecords()"><option value="">全部类型</option><option value="in">入库</option><option value="out">出库</option></select>
+        <select id="borrow-operator-filter" onchange="renderBorrowRecords()"><option value="">全部操作员</option></select>
+        <input type="text" id="borrow-search" placeholder="搜索摘要/客户..." oninput="renderBorrowRecords()" style="width:130px;">
         <button class="btn btn-primary btn-sm" onclick="openBorrowModal()">+新增</button>
         <button class="btn btn-sm" onclick="exportBorrowCSV()">导出CSV</button>
       </div>
     </div>
-    <div class="table-wrap"><table id="borrow-table"><thead><tr><th>日期</th><th>品类名称</th><th>摘要/客户</th><th>入库</th><th>出库</th><th>期末结存</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+    <div class="table-wrap"><table id="borrow-table"><thead><tr><th>日期</th><th>品类名称</th><th>摘要/客户</th><th>入库</th><th>出库</th><th>期末结存</th><th>操作员</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
     <div class="pagination" id="borrow-pagination"></div>
   </div>
 </div>
@@ -286,6 +285,10 @@ tr:hover{background:rgba(0,229,255,.03)}
     <div class="card-header"><div class="card-title">各片区/客户经理考核明细</div></div>
     <div class="table-wrap"><table id="zone-kpi-table"><thead><tr><th>片区/责任人</th><th>基础盐+中高端(吨)</th><th>中高端盐(吨)</th><th>大包盐(吨)</th><th>武当醋+料酒(件)</th><th>小包装白糖(吨)</th><th>渠道维权(分)</th><th>日常绩效(分)</th><th>合计得分</th><th>评级</th></tr></thead><tbody></tbody></table></div>
   </div>
+  <div class="card" style="margin-top:10px;">
+    <div class="card-header"><div class="card-title">客户经理个人业绩单</div></div>
+    <div class="table-wrap"><table id="personal-kpi-table"><thead><tr><th>姓名</th><th>所属片区</th><th>职能</th><th>管辖区域</th><th>客户数</th><th>月均销量(件)</th><th>A级客户</th><th>月销售额(万元)</th><th>完成率</th><th>绩效评级</th></tr></thead><tbody></tbody></table></div>
+  </div>
 </div>
 
 </div>
@@ -299,6 +302,7 @@ tr:hover{background:rgba(0,229,255,.03)}
   <div class="form-group"><label>入库数量</label><input type="number" id="bm-in" value="0"></div>
   <div class="form-group"><label>出库数量</label><input type="number" id="bm-out" value="0"></div>
   <div class="form-group"><label>期末结存</label><input type="number" id="bm-balance" value="0"></div>
+  <div class="form-group"><label>操作员</label><input type="text" id="bm-operator" value="仓管"></div>
   <div class="form-group"><label>备注</label><input type="text" id="bm-remark"></div>
   <div class="modal-actions"><button class="btn" onclick="closeBorrowModal()">取消</button><button class="btn btn-primary" id="borrow-save-btn" onclick="saveBorrowRecord()">保存</button></div>
 </div></div>
@@ -319,7 +323,7 @@ tr:hover{background:rgba(0,229,255,.03)}
 
 <script>
 // ============ GLOBAL STATE ============
-const STORAGE_KEY = 'jz_salt_v4';
+const STORAGE_KEY = 'jz_salt_v5';
 let appData = null, currentTab = 0, borrowPage = 1, borrowPageSize = 15, custPage = 1, custPageSize = 20;
 let custSubRegionFilter = '', deliveryMap = null, deliveryLayers = [], chartInstances = {}, autoSaveTimer = null;
 
@@ -361,27 +365,36 @@ const DEFAULT_PRODUCTS = [
 const CATEGORIES = ['碘盐','未加碘盐','低钠盐','海藻盐','雪花盐','调味品'];
 
 const DEFAULT_BORROWS = [
-  {_id:'b1',date:'2026-06-01',product:'500g碘盐（九凤来）',summary:'期初结转',inc:0,out:0,balance:3048,remark:''},
-  {_id:'b2',date:'2026-06-01',product:'500g纸塑盐（九凤来）',summary:'期初结转',inc:0,out:0,balance:3848,remark:''},
-  {_id:'b3',date:'2026-06-07',product:'500g碘盐（九凤来）',summary:'厂家到货',inc:867,out:0,balance:0,remark:''},
-  {_id:'b4',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'沙市长港路门店',inc:0,out:29,balance:0,remark:''},
-  {_id:'b5',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'沙市湖滨门店',inc:0,out:120,balance:0,remark:''},
-  {_id:'b6',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'小袁代理商',inc:0,out:6,balance:0,remark:''},
-  {_id:'b7',date:'2026-06-10',product:'500g碘盐（九凤来）',summary:'沙市等4户到货',inc:1600,out:0,balance:0,remark:''},
-  {_id:'b8',date:'2026-06-10',product:'500g碘盐（九凤来）',summary:'沙市批发商',inc:0,out:95,balance:0,remark:''},
-  {_id:'b9',date:'2026-06-10',product:'500g纸塑盐（九凤来）',summary:'沙市批发到货',inc:1200,out:0,balance:0,remark:''},
-  {_id:'b10',date:'2026-06-10',product:'500g纸塑盐（九凤来）',summary:'代理商取货',inc:0,out:470,balance:0,remark:''},
-  {_id:'b11',date:'2026-06-10',product:'500g纸塑盐（九凤来）',summary:'门店补货出库',inc:0,out:40,balance:0,remark:''},
-  {_id:'b12',date:'2026-06-11',product:'500g碘盐（九凤来）',summary:'沙市代理商',inc:0,out:50,balance:0,remark:''},
-  {_id:'b13',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'电商批单入库',inc:200,out:0,balance:0,remark:''},
-  {_id:'b14',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'沙市超市补货入库',inc:400,out:0,balance:0,remark:''},
-  {_id:'b15',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'盘点确认出库',inc:0,out:5,balance:1741,remark:'期末结存'},
-  {_id:'b16',date:'2026-03-17',product:'320g低钠盐',summary:'期初结转',inc:0,out:0,balance:147,remark:''},
-  {_id:'b17',date:'2026-03-20',product:'320g低钠盐',summary:'到货',inc:50,out:0,balance:0,remark:''},
-  {_id:'b18',date:'2026-06-11',product:'320g低钠盐',summary:'出库',inc:0,out:37,balance:168,remark:'期末结存'},
-  {_id:'b19',date:'2026-03-17',product:'350g海藻碘盐',summary:'期初结转',inc:0,out:0,balance:22,remark:''},
-  {_id:'b20',date:'2026-03-20',product:'350g海藻碘盐',summary:'到货',inc:50,out:0,balance:0,remark:''},
-  {_id:'b21',date:'2026-06-02',product:'350g海藻碘盐',summary:'出库',inc:0,out:15,balance:57,remark:'期末结存'}
+  {_id:'b1',date:'2026-06-01',product:'500g碘盐（九凤来）',summary:'期初结转',inc:0,out:0,balance:3048,operator:'系统',remark:''},
+  {_id:'b2',date:'2026-06-01',product:'500g纸塑盐（九凤来）',summary:'期初结转',inc:0,out:0,balance:3848,operator:'系统',remark:''},
+  {_id:'b3',date:'2026-06-07',product:'500g碘盐（九凤来）',summary:'厂家到货入库',inc:867,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b4',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'沙市长港路门店出库',inc:0,out:29,balance:0,operator:'李付强',remark:''},
+  {_id:'b5',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'沙市湖滨门店出库',inc:0,out:120,balance:0,operator:'肖丽',remark:''},
+  {_id:'b6',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'小袁代理商出库',inc:0,out:6,balance:0,operator:'肖丽',remark:''},
+  {_id:'b7',date:'2026-06-09',product:'500g碘盐（九凤来）',summary:'沙市超市代理出库',inc:0,out:5,balance:0,operator:'肖丽',remark:''},
+  {_id:'b8',date:'2026-06-10',product:'500g碘盐（九凤来）',summary:'沙市等4户到货入库',inc:1600,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b9',date:'2026-06-10',product:'500g碘盐（九凤来）',summary:'沙市批发商出库',inc:0,out:95,balance:0,operator:'李付强',remark:''},
+  {_id:'b10',date:'2026-06-10',product:'500g纸塑盐（九凤来）',summary:'沙市批发到货入库',inc:1200,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b11',date:'2026-06-10',product:'500g纸塑盐（九凤来）',summary:'代理商取货出库',inc:0,out:470,balance:0,operator:'仓管',remark:''},
+  {_id:'b12',date:'2026-06-10',product:'500g纸塑盐（九凤来）',summary:'门店补货出库',inc:0,out:40,balance:0,operator:'李付强',remark:''},
+  {_id:'b13',date:'2026-06-11',product:'500g碘盐（九凤来）',summary:'沙市代理商出库',inc:0,out:50,balance:0,operator:'李付强',remark:''},
+  {_id:'b14',date:'2026-06-11',product:'500g碘盐（九凤来）',summary:'沙市超市补货出库',inc:0,out:2,balance:0,operator:'肖丽',remark:''},
+  {_id:'b15',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'电商批单入库',inc:200,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b16',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'沙市超市补货入库',inc:400,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b17',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'盘点确认出库',inc:0,out:5,balance:1741,operator:'系统',remark:'期末结存'},
+  {_id:'b18',date:'2026-06-12',product:'500g纸塑盐（九凤来）',summary:'盘点确认出库',inc:0,out:15,balance:714,operator:'系统',remark:'期末结存'},
+  {_id:'b19',date:'2026-03-17',product:'320g低钠盐',summary:'期初结转',inc:0,out:0,balance:147,operator:'系统',remark:''},
+  {_id:'b20',date:'2026-03-20',product:'320g低钠盐',summary:'到货入库',inc:50,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b21',date:'2026-06-11',product:'320g低钠盐',summary:'门店出库',inc:0,out:37,balance:168,operator:'仓管',remark:'期末结存'},
+  {_id:'b22',date:'2026-03-17',product:'350g海藻碘盐',summary:'期初结转',inc:0,out:0,balance:22,operator:'系统',remark:''},
+  {_id:'b23',date:'2026-03-20',product:'350g海藻碘盐',summary:'到货入库',inc:50,out:0,balance:0,operator:'仓管',remark:''},
+  {_id:'b24',date:'2026-06-02',product:'350g海藻碘盐',summary:'门店出库',inc:0,out:15,balance:57,operator:'仓管',remark:'期末结存'},
+  {_id:'b25',date:'2026-06-05',product:'500g纸塑盐（九凤来）',summary:'门店补货出库',inc:0,out:9,balance:0,operator:'李付强',remark:''},
+  {_id:'b26',date:'2026-06-07',product:'500g碘盐（九凤来）',summary:'门店销售出库',inc:0,out:3,balance:0,operator:'仓管',remark:''},
+  {_id:'b27',date:'2026-06-08',product:'500g碘盐（九凤来）',summary:'小袁代理商出库',inc:0,out:2,balance:0,operator:'肖丽',remark:''},
+  {_id:'b28',date:'2026-06-12',product:'500g碘盐（九凤来）',summary:'无名代理出库',inc:0,out:2,balance:0,operator:'仓管',remark:''},
+  {_id:'b29',date:'2026-06-12',product:'400g绿色精制碘盐',summary:'盘点结转',inc:0,out:0,balance:359,operator:'系统',remark:'期末结存'},
+  {_id:'b30',date:'2026-06-12',product:'400g绿色未加碘盐',summary:'期初结转',inc:0,out:0,balance:411,operator:'系统',remark:'无变动'}
 ];
 
 // Generate realistic customers per zone
@@ -468,6 +481,17 @@ const DEFAULT_SALES_TREND = [
   {month:'2026-06',baseSalt:278,highSalt:32,bigSalt:72,vinegar:252,sugar:2.1}
 ];
 
+const DEFAULT_PERSONAL_KPIS = [
+  {name:'肖丽',zone:'沙市城区',role:'客户经理',areas:'荆州开发区/中山路/崇文/胜利/联合/沙北新区',custCount:56,monthlyVol:3820,aCount:22,salesAmt:28.5,rate:88.5},
+  {name:'李付强',zone:'沙市城区',role:'客户经理',areas:'朝阳/立新/锣场镇/观音垱镇',custCount:48,monthlyVol:3260,aCount:18,salesAmt:24.3,rate:82.1},
+  {name:'李光元',zone:'荆州城区',role:'客户经理',areas:'解放路/西城/东城',custCount:52,monthlyVol:4150,aCount:25,salesAmt:31.2,rate:92.4},
+  {name:'谢智刚',zone:'荆州城区',role:'客户经理',areas:'城南/郢城/凤凰路/荆北新区/关沮镇',custCount:58,monthlyVol:3890,aCount:24,salesAmt:29.8,rate:89.3},
+  {name:'黄威',zone:'西片区拓展片区',role:'拓展负责人',areas:'两湖大市场/农高区/纪南镇',custCount:38,monthlyVol:2100,aCount:12,salesAmt:16.8,rate:68.5},
+  {name:'赵江新',zone:'西片区拓展片区',role:'拓展负责人',areas:'八岭山/李埠/川店/马山镇',custCount:36,monthlyVol:1820,aCount:9,salesAmt:14.2,rate:62.3},
+  {name:'赵潇荣',zone:'东片区辐射片区',role:'辐射负责人',areas:'江陵辖区/岑河/郝穴',custCount:42,monthlyVol:2580,aCount:14,salesAmt:19.5,rate:71.2},
+  {name:'张纯',zone:'东片区辐射片区',role:'辐射负责人',areas:'资市/普济/白马寺/马家寨/秦市/沙岗/三湖',custCount:45,monthlyVol:2240,aCount:11,salesAmt:17.6,rate:65.8}
+];
+
 function getDefaultData() {
   return {
     products: JSON.parse(JSON.stringify(DEFAULT_PRODUCTS)),
@@ -477,7 +501,8 @@ function getDefaultData() {
     vehicles: JSON.parse(JSON.stringify(DEFAULT_VEHICLES)),
     kpiMetrics: JSON.parse(JSON.stringify(DEFAULT_KPI_METRICS)),
     zoneKpis: JSON.parse(JSON.stringify(DEFAULT_ZONE_KPIS)),
-    salesTrend: JSON.parse(JSON.stringify(DEFAULT_SALES_TREND))
+    salesTrend: JSON.parse(JSON.stringify(DEFAULT_SALES_TREND)),
+    personalKpis: JSON.parse(JSON.stringify(DEFAULT_PERSONAL_KPIS))
   };
 }
 
@@ -487,7 +512,7 @@ function loadData() {
   appData = getDefaultData();
 }
 function saveData(silent) {
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(appData));if(!silent)showToast('数据已保存','success');}
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(appData));if(!silent)showToast('💾 数据已自动保存','success');}
   catch(e){showToast('保存失败','error');}
 }
 function resetAllData() {
@@ -648,10 +673,15 @@ function renderBorrowRecords(){
   let recs=[...appData.borrows];
   const mf=document.getElementById('borrow-month-filter').value;
   const pf=document.getElementById('borrow-product-filter').value;
+  const tf=document.getElementById('borrow-type-filter').value;
+  const of=document.getElementById('borrow-operator-filter').value;
   const st=document.getElementById('borrow-search').value.toLowerCase();
   if(mf) recs=recs.filter(r=>r.date.startsWith(mf));
   if(pf) recs=recs.filter(r=>r.product===pf);
-  if(st) recs=recs.filter(r=>r.summary.toLowerCase().includes(st));
+  if(tf==='in') recs=recs.filter(r=>r.inc>0);
+  if(tf==='out') recs=recs.filter(r=>r.out>0);
+  if(of) recs=recs.filter(r=>r.operator===of);
+  if(st) recs=recs.filter(r=>r.summary.toLowerCase().includes(st)||r.product.includes(st));
   recs.sort((a,b)=>a.date.localeCompare(b.date));
   const tp=Math.ceil(recs.length/borrowPageSize);
   if(borrowPage>tp) borrowPage=1;
@@ -660,12 +690,14 @@ function renderBorrowRecords(){
   document.querySelector('#borrow-table tbody').innerHTML=pg.map(r=>'<tr><td>'+r.date+'</td><td>'+r.product+'</td><td>'+r.summary+'</td>'+
     '<td>'+(r.inc>0?'<span style="color:#00e676">+'+r.inc+'</span>':'')+'</td>'+
     '<td>'+(r.out>0?'<span style="color:#ff5252">-'+r.out+'</span>':'')+'</td>'+
-    '<td>'+(r.balance>0?r.balance:'')+'</td><td>'+r.remark+'</td>'+
+    '<td>'+(r.balance>0?r.balance:'')+'</td><td>'+(r.operator||'--')+'</td><td>'+r.remark+'</td>'+
     '<td><button class="btn btn-danger btn-xs" onclick="deleteBorrow(\''+r._id+'\')">删</button></td></tr>').join('');
   const months=[...new Set(appData.borrows.map(r=>r.date.slice(0,7)))].sort();
   document.getElementById('borrow-month-filter').innerHTML='<option value="">全部月份</option>'+months.map(m=>'<option value="'+m+'">'+m+'</option>').join('');
   const prods=[...new Set(appData.borrows.map(r=>r.product))].sort();
   document.getElementById('borrow-product-filter').innerHTML='<option value="">全部品类</option>'+prods.map(p=>'<option>'+p+'</option>').join('');
+  const ops=[...new Set(appData.borrows.map(r=>r.operator).filter(Boolean))].sort();
+  document.getElementById('borrow-operator-filter').innerHTML='<option value="">全部操作员</option>'+ops.map(o=>'<option>'+o+'</option>').join('');
   document.getElementById('borrow-pagination').innerHTML=
     '<button onclick="borrowPage=1;renderBorrowRecords()" '+(borrowPage<=1?'disabled':'')+'>首页</button>'+
     '<button onclick="borrowPage--;renderBorrowRecords()" '+(borrowPage<=1?'disabled':'')+'>上一页</button>'+
@@ -706,7 +738,8 @@ function openBorrowModal(){
   document.getElementById('borrow-modal-title').textContent='新增借货记录';
   document.getElementById('bm-date').value='';document.getElementById('bm-summary').value='';
   document.getElementById('bm-in').value='0';document.getElementById('bm-out').value='0';
-  document.getElementById('bm-balance').value='0';document.getElementById('bm-remark').value='';
+  document.getElementById('bm-balance').value='0';document.getElementById('bm-operator').value='仓管';
+  document.getElementById('bm-remark').value='';
   document.getElementById('bm-product').innerHTML=appData.products.map(p=>'<option>'+p.name+'</option>').join('');
   document.getElementById('borrow-modal').classList.add('show');
 }
@@ -716,6 +749,7 @@ function saveBorrowRecord(){
     date:document.getElementById('bm-date').value,product:document.getElementById('bm-product').value,
     summary:document.getElementById('bm-summary').value,inc:parseInt(document.getElementById('bm-in').value)||0,
     out:parseInt(document.getElementById('bm-out').value)||0,balance:parseInt(document.getElementById('bm-balance').value)||0,
+    operator:document.getElementById('bm-operator').value||'仓管',
     remark:document.getElementById('bm-remark').value};
   if(!r.date||!r.summary){showToast('请填写日期和摘要','error');return;}
   appData.borrows.push(r);appData.borrows.sort((a,b)=>a.date.localeCompare(b.date));
@@ -833,14 +867,19 @@ function renderCustomerTable(){
   if(mgrF) custs=custs.filter(c=>c.manager===mgrF);
   if(custSubRegionFilter) custs=custs.filter(c=>c.subregion===custSubRegionFilter);
   if(typeF) custs=custs.filter(c=>c.ctype===typeF);
-  if(search) custs=custs.filter(c=>c.storeName.includes(search)||c.contact.includes(search)||c.phone.includes(search));
+  if(search) custs=custs.filter(c=>c.storeName.includes(search)||c.contact.includes(search)||c.phone.includes(search)||c.zone.includes(search)||c.subregion.includes(search));
   const totalPages=Math.ceil(custs.length/custPageSize);
   if(custPage>totalPages) custPage=1;
   const start=(custPage-1)*custPageSize;
   const pg=custs.slice(start,start+custPageSize);
   document.querySelector('#cust-table tbody').innerHTML=pg.map(c=>'<tr><td>'+c.id+'</td>'+
-    '<td>'+c.storeName+'</td><td>'+c.zone+'</td><td>'+c.subregion+'</td><td>'+c.manager+'</td>'+
-    '<td>'+c.ctype+'</td><td>'+c.contact+'</td><td>'+c.phone+'</td><td>'+c.grade+'</td><td>'+c.volume+'</td>'+
+    '<td contenteditable="true" onblur="editCustomerField('+c.id+',\'storeName\',this.textContent)">'+c.storeName+'</td>'+
+    '<td>'+c.zone+'</td><td>'+c.subregion+'</td><td>'+c.manager+'</td>'+
+    '<td>'+c.ctype+'</td>'+
+    '<td contenteditable="true" onblur="editCustomerField('+c.id+',\'contact\',this.textContent)">'+c.contact+'</td>'+
+    '<td contenteditable="true" onblur="editCustomerField('+c.id+',\'phone\',this.textContent)">'+c.phone+'</td>'+
+    '<td>'+c.grade+'</td>'+
+    '<td contenteditable="true" onblur="editCustomerField('+c.id+',\'volume\',parseInt(this.textContent)||0)">'+c.volume+'</td>'+
     '<td><button class="btn btn-danger btn-xs" onclick="deleteCustomer('+c.id+')">删</button></td></tr>').join('');
   const types=[...new Set(appData.customers.map(c=>c.ctype))].sort();
   document.getElementById('cust-type-filter').innerHTML='<option value="">全部业态</option>'+types.map(t=>'<option>'+t+'</option>').join('');
@@ -883,6 +922,10 @@ function saveCustomer(){
   appData.customers.push(cust);saveData(true);closeCustomerModal();refreshModule2();showToast('客户已添加','success');
 }
 function deleteCustomer(id){if(!confirm('确认删除？'))return;appData.customers=appData.customers.filter(c=>c.id!==id);saveData(true);refreshModule2();showToast('已删除','success');}
+function editCustomerField(id,field,value){
+  const cust=appData.customers.find(c=>c.id===id);
+  if(cust&&cust[field]!==value){cust[field]=value;saveData(true);showToast('客户信息已更新','success');}
+}
 function exportCustomerCSV(){
   let csv='\uFEFF序号,客户名称,所属片区,子区域,客户经理,业态类型,联系人,电话,等级,月均销量(件)\n';
   appData.customers.forEach(c=>{csv+=c.id+','+c.storeName+','+c.zone+','+c.subregion+','+c.manager+','+c.ctype+','+c.contact+','+c.phone+','+c.grade+','+c.volume+'\n';});
@@ -996,7 +1039,7 @@ function flyToZone(zone){
 }
 
 // ============ MODULE 4: SALES ASSESSMENT ============
-function refreshModule4(){renderSalesKPIs();renderSalesCharts();renderKPITable();renderZoneKPITable();}
+function refreshModule4(){renderSalesKPIs();renderSalesCharts();renderKPITable();renderZoneKPITable();renderPersonalKPITable();}
 
 function calcKpiScore(actual,target,weight){
   if(target===0)return weight;
@@ -1117,6 +1160,23 @@ function updateZoneKPI(zone,field,value){
   if(z){z[field]=parseFloat(value)||0;saveData(true);}
 }
 
+function renderPersonalKPITable(){
+  const pk=appData.personalKpis;
+  if(!pk||pk.length===0){document.querySelector('#personal-kpi-table tbody').innerHTML='';return;}
+  document.querySelector('#personal-kpi-table tbody').innerHTML=pk.map(p=>{
+    const perfGrade=p.rate>=90?'A':p.rate>=80?'B':p.rate>=70?'C':'D';
+    const gradeCls='score-'+perfGrade;
+    return '<tr><td style="font-weight:600;color:var(--cyan)">'+p.name+'</td>'+
+      '<td>'+p.zone+'</td><td>'+p.role+'</td><td style="font-size:11px;max-width:260px;white-space:normal">'+p.areas+'</td>'+
+      '<td><span style="color:'+(p.custCount>=40?'#00e676':'#ffc107')+'">'+p.custCount+'</span></td>'+
+      '<td>'+p.monthlyVol.toLocaleString()+'</td>'+
+      '<td><span style="color:#00e676">'+p.aCount+'</span></td>'+
+      '<td style="color:var(--gold)">¥'+p.salesAmt.toFixed(1)+'万</td>'+
+      '<td><div style="display:flex;align-items:center;gap:6px;min-width:100px"><div class="progress-bar" style="flex:1"><div class="progress-fill '+(p.rate>=90?'progress-green':p.rate>=80?'progress-blue':p.rate>=70?'progress-gold':'progress-red')+'" style="width:'+Math.min(100,p.rate)+'%"></div></div>'+p.rate+'%</div></td>'+
+      '<td><span class="score-badge '+gradeCls+'">'+perfGrade+'</span></td></tr>';
+  }).join('');
+}
+
 // ============ WINDOW RESIZE ============
 window.addEventListener('resize',function(){Object.values(chartInstances).forEach(c=>{if(c&&c.resize)c.resize();});if(deliveryMap)deliveryMap.invalidateSize();});
 
@@ -1131,7 +1191,7 @@ function startAutoSave(){autoSaveTimer=setInterval(function(){saveData(true);},3
 function refreshAll(){updateHeaderKPI();if(currentTab===0)refreshModule1();else if(currentTab===1)refreshModule2();else if(currentTab===2)setTimeout(refreshModule3,100);else if(currentTab===3)refreshModule4();}
 
 // ============ INIT ============
-function init(){loadData();updateHeaderKPI();refreshModule1();startAutoSave();console.log('荆州盐业智能管理系统 v4.0 已就绪');}
+function init(){loadData();updateHeaderKPI();refreshModule1();startAutoSave();console.log('荆州盐业智能管理系统 v5.0 已就绪');}
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
