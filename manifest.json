@@ -1,0 +1,23 @@
+{
+  "name": "荆州盐业智能管理系统",
+  "short_name": "盐业管理",
+  "description": "湖北盐业集团有限公司荆州分公司营销中心智能管理系统",
+  "start_url": "/jingzhou-salt-system/",
+  "display": "standalone",
+  "background_color": "#050c1a",
+  "theme_color": "#050c1a",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "assets/icons/logo-original.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ],
+  "lang": "zh-CN"
+}
